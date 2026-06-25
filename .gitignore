@@ -1,0 +1,6 @@
+.DS_Store
+*.tmp
+*.log
+!.gitignore
+!sample-data/logs/application.log
+
