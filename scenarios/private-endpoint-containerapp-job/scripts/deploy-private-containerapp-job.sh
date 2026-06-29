@@ -18,6 +18,7 @@ set -euo pipefail
 : "${CONTAINERAPPS_SUBNET:=containerapps-subnet}"
 : "${PRIVATE_ENDPOINT_SUBNET:=private-endpoints-subnet}"
 : "${PRIVATE_DNS_ZONE:=privatelink.file.core.windows.net}"
+: "${LOG_ANALYTICS_WORKSPACE:=${PREFIX}-law}"
 
 IMAGE_NAME="azfiles-sync"
 IMAGE_TAG="v2"
@@ -144,12 +145,31 @@ az role assignment create --assignee-object-id "$IDENTITY_PRINCIPAL_ID" --assign
 
 az acr build --registry "$ACR_NAME" --image "${IMAGE_NAME}:${IMAGE_TAG}" ./container
 
+az monitor log-analytics workspace create \
+  --resource-group "$RG" \
+  --workspace-name "$LOG_ANALYTICS_WORKSPACE" \
+  --location "$LOCATION" \
+  -o none
+
+LOG_ANALYTICS_WORKSPACE_ID=$(az monitor log-analytics workspace show \
+  --resource-group "$RG" \
+  --workspace-name "$LOG_ANALYTICS_WORKSPACE" \
+  --query customerId -o tsv)
+
+LOG_ANALYTICS_WORKSPACE_KEY=$(az monitor log-analytics workspace get-shared-keys \
+  --resource-group "$RG" \
+  --workspace-name "$LOG_ANALYTICS_WORKSPACE" \
+  --query primarySharedKey -o tsv)
+
 az containerapp env create \
   --resource-group "$RG" \
   --name "$CONTAINERAPPS_ENV" \
   --location "$LOCATION" \
   --infrastructure-subnet-resource-id "$CONTAINERAPPS_SUBNET_ID" \
   --internal-only true \
+  --logs-destination log-analytics \
+  --logs-workspace-id "$LOG_ANALYTICS_WORKSPACE_ID" \
+  --logs-workspace-key "$LOG_ANALYTICS_WORKSPACE_KEY" \
   -o none
 
 SOURCE_URL="https://${SRC_STORAGE}.file.core.windows.net/${SRC_SHARE}"
@@ -186,6 +206,7 @@ Source share:                ${SRC_SHARE}
 Destination storage account: ${DST_STORAGE}
 Destination share:           ${DST_SHARE}
 Private DNS zone:            ${PRIVATE_DNS_ZONE}
+Log Analytics workspace:     ${LOG_ANALYTICS_WORKSPACE}
 Container Apps environment:  ${CONTAINERAPPS_ENV}
 Container Apps job:          ${CONTAINERAPP_JOB}
 Managed identity:            ${IDENTITY_NAME}

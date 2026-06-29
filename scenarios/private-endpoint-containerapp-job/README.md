@@ -8,6 +8,7 @@ It uses:
 - Private DNS zone `privatelink.file.core.windows.net`.
 - Azure Container Apps Environment integrated with a VNet.
 - Scheduled Azure Container Apps Job.
+- A named Log Analytics workspace for Container Apps logs.
 - AzCopy running inside a container.
 - User-assigned managed identity for Azure Files RBAC and ACR pull.
 
@@ -47,6 +48,7 @@ export ACR_NAME="${PREFIX}acr"
 export IDENTITY_NAME="${PREFIX}-sync-mi"
 export CONTAINERAPPS_ENV="${PREFIX}-cae"
 export CONTAINERAPP_JOB="${PREFIX}-azfiles-sync-job"
+export LOG_ANALYTICS_WORKSPACE="${PREFIX}-law"
 
 export SRC_SHARE="sourcefiles"
 export DST_SHARE="destfiles"
@@ -58,6 +60,8 @@ Run:
 chmod +x scripts/deploy-private-containerapp-job.sh
 ./scripts/deploy-private-containerapp-job.sh
 ```
+
+The script creates a deterministic Log Analytics workspace named by `LOG_ANALYTICS_WORKSPACE` and passes it explicitly to the Container Apps environment. This avoids Azure CLI auto-generating a new random workspace if environment creation is retried.
 
 ## Upload sample data
 
