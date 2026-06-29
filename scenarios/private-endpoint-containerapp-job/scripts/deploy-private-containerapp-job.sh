@@ -20,7 +20,7 @@ set -euo pipefail
 : "${PRIVATE_DNS_ZONE:=privatelink.file.core.windows.net}"
 
 IMAGE_NAME="azfiles-sync"
-IMAGE_TAG="v1"
+IMAGE_TAG="v2"
 
 az account set --subscription "$SUBSCRIPTION_ID"
 az extension add --name containerapp --upgrade -o none
@@ -42,6 +42,13 @@ az network vnet subnet create \
   --name "$PRIVATE_ENDPOINT_SUBNET" \
   --address-prefixes 10.42.2.0/24 \
   --private-endpoint-network-policies Disabled \
+  -o none
+
+az network vnet subnet update \
+  --resource-group "$RG" \
+  --vnet-name "$VNET_NAME" \
+  --name "$CONTAINERAPPS_SUBNET" \
+  --delegations Microsoft.App/environments \
   -o none
 
 CONTAINERAPPS_SUBNET_ID=$(az network vnet subnet show --resource-group "$RG" --vnet-name "$VNET_NAME" --name "$CONTAINERAPPS_SUBNET" --query id -o tsv)
@@ -165,7 +172,8 @@ az containerapp job create \
   --env-vars \
     "SOURCE_URL=${SOURCE_URL}" \
     "DESTINATION_URL=${DESTINATION_URL}" \
-    "AZCOPY_AUTO_LOGIN_IDENTITY_CLIENT_ID=${IDENTITY_CLIENT_ID}" \
+    "AZCOPY_AUTO_LOGIN_TYPE=MSI" \
+    "AZCOPY_MSI_CLIENT_ID=${IDENTITY_CLIENT_ID}" \
   -o none
 
 cat <<EOF
