@@ -1,0 +1,6 @@
+Quarterly operational summary
+
+This is synthetic unstructured test content for Azure Files cross-region sync validation.
+
+The file is intended for demo purposes only.
+
