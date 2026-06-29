@@ -65,7 +65,31 @@ The script creates a deterministic Log Analytics workspace named by `LOG_ANALYTI
 
 ## Upload sample data
 
-Because public access is disabled, run this from a machine that can resolve and reach the source storage private endpoint:
+Because public access is disabled, the cleanest way to seed dummy data is to run a temporary Container Apps Job inside the same private Container Apps environment.
+
+Run:
+
+```bash
+chmod +x scripts/generate-source-dummy-data-job.sh
+./scripts/generate-source-dummy-data-job.sh
+```
+
+This script:
+
+- Builds a temporary `source-data-generator` image in the existing Azure Container Registry.
+- Creates a manual Container Apps Job in the private Container Apps environment.
+- Generates sample `.txt`, `.rtf`, `.html`, `.json`, `.log`, and random payload files.
+- Uploads the files to the source Azure Files share over the private endpoint using AzCopy and managed identity.
+- Deletes the temporary generator job and image by default.
+
+To keep the temporary generator job and image for troubleshooting, run:
+
+```bash
+export CLEANUP_GENERATOR=false
+./scripts/generate-source-dummy-data-job.sh
+```
+
+Alternatively, upload sample data from a machine that can resolve and reach the source storage private endpoint:
 
 ```bash
 chmod +x scripts/upload-sample-data-private.sh
