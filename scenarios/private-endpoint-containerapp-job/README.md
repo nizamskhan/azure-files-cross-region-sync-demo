@@ -136,12 +136,13 @@ az storage file list \
 The container runs:
 
 ```bash
-azcopy login --identity --identity-client-id "$AZCOPY_AUTO_LOGIN_IDENTITY_CLIENT_ID"
+AZCOPY_AUTO_LOGIN_TYPE=MSI
+AZCOPY_MSI_CLIENT_ID=<managed-identity-client-id>
 
-azcopy copy "$SOURCE_URL" "$DESTINATION_URL" \
+azcopy sync "$SOURCE_URL" "$DESTINATION_URL" \
   --recursive=true \
   --from-to=FileFile \
-  --overwrite=ifSourceNewer
+  --delete-destination=true
 ```
 
-This is a copy/update pattern. It does not delete files from the destination if they are removed from the source.
+This is an exact mirror pattern. Files that exist only in the destination are deleted because `--delete-destination=true` treats the source share as authoritative.

@@ -21,7 +21,7 @@ set -euo pipefail
 : "${LOG_ANALYTICS_WORKSPACE:=${PREFIX}-law}"
 
 IMAGE_NAME="azfiles-sync"
-IMAGE_TAG="v2"
+IMAGE_TAG="v3"
 
 az account set --subscription "$SUBSCRIPTION_ID"
 az extension add --name containerapp --upgrade -o none

@@ -42,6 +42,5 @@ Invoke-AzCopyCommand `
 
 Invoke-AzCopyCommand `
     -AzCopyPath $azCopy.FullName `
-    -Arguments @('copy', $sourceUrl, $destinationUrl, '--recursive=true', '--from-to=FileFile', '--overwrite=ifSourceNewer') `
-    -FailureMessage 'AzCopy copy failed'
-
+    -Arguments @('sync', $sourceUrl, $destinationUrl, '--recursive=true', '--from-to=FileFile', '--delete-destination=true') `
+    -FailureMessage 'AzCopy sync failed'
